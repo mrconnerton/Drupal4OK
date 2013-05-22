@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * help4ok_rules.rules_defaults.inc
+ * emergency_response_rules.rules_defaults.inc
  */
 
 /**
  * Implements hook_default_rules_configuration().
  */
-function help4ok_rules_default_rules_configuration() {
+function emergency_response_rules_default_rules_configuration() {
   $items = array();
   $items['rules_add_content_redirect_to_login'] = entity_import('rules_config', '{ "rules_add_content_redirect_to_login" : {
       "LABEL" : "Add content redirect to login",

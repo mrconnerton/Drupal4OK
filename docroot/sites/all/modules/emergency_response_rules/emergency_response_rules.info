@@ -1,9 +1,9 @@
-name = help4ok_rules
-description = help4ok_rules
+name = emergency_response_rules
+description = emergency_response_rules
 core = 7.x
-package = Features
+package = Emergency Response
 version = 7.x-1.0
-project = help4ok_rules
+project = emergency_response_rules
 dependencies[] = entity
 dependencies[] = rules
 features[features_api][] = api:2
