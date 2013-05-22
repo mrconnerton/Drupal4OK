@@ -21,6 +21,9 @@ function confirm_status_cron() {
  * @param array $contact
  *  Individual contact item.
  *  @see hook_confirm_status
+ *
+ * @return boolean
+ *  Indicates whether the sms message was enqueued or the call was placed.
  */
 function confirm_status_process_contact($contact) {
 
@@ -96,7 +99,7 @@ function confirm_status_process_contact($contact) {
           break;
 
       }
-
+  return $result;
 }
 
 /**
