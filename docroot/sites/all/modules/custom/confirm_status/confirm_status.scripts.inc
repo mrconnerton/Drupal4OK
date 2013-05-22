@@ -8,10 +8,15 @@ Messages that are broken into multiple segments, might not arrive in proper sequ
  * Implementation of hook_voipscript_get_script_names()
  */
 function confirm_status_voipscript_get_script_names() {
-  $script_names[] = 'confirm_status_sms_handler_script';
+  $script_names[] = 'confirm_status_sms_response_handler_script';
+  $script_names[] = 'confirm_status_voice_response_handler_script';
   return $script_names;
 
 }
+
+/**
+ *
+ */
 
 /**
  * Implementation of hook_voipscript_load_script()
@@ -23,14 +28,14 @@ function confirm_status_voipscript_load_script($script_name, $options = NULL) {
     default:
       break;
 
-    case 'confirm_status_sms_handler_script':
+    case 'confirm_status_sms_response_handler_script':
       // Get incoming text message, parameters associated with it and then call
       // next script, which actually processes the response. (For VOIP Drupal
       // internal reasons, these two steps need to be handled as two separate
       // scripts.)
 
       // VoIP script for Text channel
-      $script = new VoipScript('confirm_status_sms_handler_script');
+      $script = new VoipScript('confirm_status_sms_response_handler_script');
       // log the sms
       $log_msg = t("SMS from %caller_number on @date (id: %call_id)",
         array('@date' => format_date(time(), 'custom', 'D, m/d/Y - H:i:s')));
@@ -42,15 +47,27 @@ function confirm_status_voipscript_load_script($script_name, $options = NULL) {
       $options['dest_number'] = '%dest_number';
       $options['call_id'] = '%cid';
       $options['source'] = '%source';
+      $options['contact_info'] = '%contact_info';
       $script->addGosub('confirm_status_sms_process_response_script', $options);
+
       break;
+
+    case 'confirm_status_voice_response_handler_script':
+      confirm_status_voice_process_response_script();
+      // TODO
+      // Clear nid from confirm_status_pending table.
+    break;
 
     case 'confirm_status_sms_process_response_script':
       //Helper script to process SMS request
       $script = new VoipScript('confirm_status_sms_process_response_script');
 
-// @TODO call this:
-_confirm_status_sms_process_response();
+      // contact_info is passed to VOIP as a json encoded string. Decode to array to simplify handling.
+      $contact_info = json_decode($options['contact_info']);
+      $options['contact_info'] = $contact_info;
+
+      // Process message and get follow up message to send to user.
+      $result_message = _confirm_status_sms_process_response($options);
 
       $result = voipcall_special_chars($result);
 
@@ -69,6 +86,9 @@ _confirm_status_sms_process_response();
         $script->addLog("sending $text");
       }
       $script->addHangup();
+
+      // TODO
+      // Clear nid from confirm_status_pending table.
       break;
   }
 
@@ -122,19 +142,26 @@ function _confirm_status_make_160_char_messages($message) {
  *
  * Check if response is yes or no and if caller number is valid. Update db accordingly.
  *
- * @param string $msg
- *  Text message received.
- *
- * @param string $dest_number
- *  Destination number from incoming message (this is OUR number).
- *
- * @param $call_id
- *  ID of the VOIP call object
- *
+ * @param array $options
+ *   - text, sms message received
+ *   - caller_number, person replying to us (sender of SMS)
+ *   - dest_number, number where they sent SMS to (our number)
+ *   - call_id, identifier for $call object, @see VoipCall
+ *   - source, @see VoipCall class
+ *   - contact_info, array @see hook_confirm_status
+ * 
  * @return $ret
  *  Confirmation message to be sent back to message sender.
  */
-function _confirm_status_sms_process_response($msg, $caller_number, $dest_number, $call_id) {
+function _confirm_status_sms_process_response($options) {
+  $msg = $options['text'];
+  $caller_number = $options['caller_number'];
+  $dest_number = $options['dest_number'];
+  $call_id = $options['call_id'];
+  $contact_info = $options['contact_info'];
+  $callback = $contact_info['callback'];
+  $nid = $contact_info['nid'];
+
   watchdog('confirm_status', "In _confirm_status_sms_process_response with $msg, $caller_number, $dest_number");
   global $language;
 
@@ -154,79 +181,32 @@ function _confirm_status_sms_process_response($msg, $caller_number, $dest_number
     $msg_temp = trim($msg);
     $msg_temp = str_replace(" ", "", $msg_temp);
     if ($msg_tmp == 'yes') {
-      // Leave status unchanged. Person still needs/has the thing the posted
+      // Call callback for "yes".
+      // Normal behavior: Leave status unchanged. Person still needs/has the thing the posted
       // about.
-
+      call_user_func($callback, $nid, 'confirmed');
+      // Set confirmation message to be sent to user.
+      $ret = t('Thank you. Your reply has been processed.', array(), $langcode);
     } 
-    else {
-      
+    else if ($msg_temp == 'no') {
+      // Call callback to update status to "closed".
+      call_user_func($callback, $nid, 'not confirmed');
+      // Set confirmation message to be sent to user.
+      $ret = t('Thank you. Your reply has been processed.', array(), $langcode);
     }
-
-    // CONTINUE HERE
-
-        //Else this is CREATE request
-        //Get array of valid site_ids for this SMS number
-        $valid_site_ids = $ontrack_phone->getSiteIds();
-        if (count($valid_site_ids) == 1) {
-          //There is just one matching site for this SMS number, check
-          //if its using retrieve SMS syntax
-          $site_id = reset($valid_site_ids);
-          $ontrack_site = new OnTrackSite($site_id);
-          if ($ontrack_phone->getSyntax() == 'retrieve') {
-            //This SMS number is set to retrieve id from dest_number so create ticket
-            $ticket_text = $msg;
-            $site_langcode = $ontrack_site->getSiteLanguage();
-            //Use site language, if not set use phone number languaage
-            $langcode = !empty($site_langcode) ? $site_langcode : $default_langcode;
-            $ret = ontrackvoip_create_ticket($ontrack_site, $ticket_text, $caller_number, $langcode);
-            return $ret;
-          }
-        }
-        #Else
-        //Check if this SMS has embedded site id in its body
-        $request = explode(" ", $msg);
-        $site_id = $request[0];
-        if (is_numeric($site_id)) {
-          //SMS syntax: embedded site id
-          //Check if site_id is valid
-          if (isset($valid_site_ids[$site_id])) {
-            //Load site object for further info like language, site name,...
-            $ontrack_site = new OnTrackSite($site_id);
-            //Create new ticket
-            unset($request[0]); //remove site_id from ticket_text
-            $site_langcode = $ontrack_site->getSiteLanguage();
-            //Use site language, if not set use phone number languaage
-            $langcode = !empty($site_langcode) ? $site_langcode : $default_langcode;
-            $ticket_text = implode(" ", $request);
-            $ret = ontrackvoip_create_ticket($ontrack_site, $ticket_text, $caller_number, $langcode);
-          }
-          else {
-            //Invalid site id
-            //@todo: replace XXX with contact number
-            $ret = t("!site_id is not a valid site identifier. Please contact the site administrator for additional information.",
-              array(
-                '!site_id' => $site_id,
-              ),
-              array(
-                'langcode' => $default_langcode,
-              )
-            );
-
-            //log the error
-            ontrackvoip_log($site_id . " is not a valid site. Call ID: ".$call_id);
-          }
-        }
-        else {
-          //Missing site id
-          if(!$ret) {
-            $ret = t("Missing site id.", array(), array('langcode' => $default_langcode)) . ' ' . $help_msg;
-            //log the error
-            ontrackvoip_log("Message with invalid request received. Message content: ".print_r($msg, true)." Call ID: ".$call_id);
-          }
-        }
-      }
+    else {
+      // Invalid response.   
+      call_user_func($callback, $nid, 'invalid');
+      // Set confirmation message to be sent to user.
+      $ret = t('Sorry. Your reply was invalid and could not be processed.', array(), $langcode);
     }
   }
+
   return $ret;
 }
 
+function confirm_status_voice_process_response_script() {
+  // TODO
+  // process
+  // clear nid from confirm_status_pending table.
+}

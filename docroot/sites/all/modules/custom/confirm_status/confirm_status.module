@@ -3,6 +3,114 @@
  * @file confirm_status.module
  */
 
+/**
+ * Implements hook_cron().
+ */
 function confirm_status_cron() {
-  
+  // This needs to recieve an array of information for
+  // users who need to be sent a message
+  $contacts = module_invoke('confirm_status');
+  foreach($contacts as $contact) {
+    confirm_status_process_contact($contact);
+  }
+}
+
+/**
+ * Send confirmation message (via SMS or voice call) to specified contact.
+ *
+ * @param array $contact
+ *  Individual contact item.
+ *  @see hook_confirm_status
+ */
+function confirm_status_process_contact($contact) {
+
+      $phone_num  = $contact['phone_num'];
+      $language   = $contact['language'];
+      $pref       = $contact['contact_preference'];
+      $nid        = $contact['nid'];
+      $callback   = $contact['callback'];
+
+     // TODO
+       // check confirm_status_pending table.
+         // if nid is being processed, skip to next record.
+         // if nid is NOT in table
+
+      // The reply needs to be boolean
+        // handle true callback
+        // call $callback($nid, $reply);
+
+      switch($pref) {
+
+        case 'text':
+          $message = $contact['message'] . t("Please reply 'yes' or 'no'.", array(), array('langcode' => $language));
+
+          // Build call object.
+          $call = new VoipCall();
+          $call->setDestNumber($phone_num);
+          $script_name = "confirm_status_sms_response_handler_script";
+          $script = VoipScript::loadScript($script_name);
+          $script->setVar('contact_info', json_encode($contact));
+          $call->setScript($script);
+          // Set duration for session. This is how long person has to reply in seconds. 86400 is 24 hours.
+          $call->setMaxSessionDuration(86400);
+
+          $result = voip_text($message, $call);
+          if ($result) {
+            watchdog('confirm_status', "Confirmation SMS for $phone_number has been enqueued with third party voip provider.");
+          }
+          else {
+             $msg = $call->getErrorMessage();
+             $details = array('@msg' => $msg);
+             watchdog('confirm_status', 'SMS confirmation failed with the following error: @msg',$details, WATCHDOG_WARNING);
+          }
+          break;
+
+        case 'voice':
+          // Compose message.
+          $message = t("This is a message from !name. ", 
+                      // @TODO make !name configurable.
+                      array('!name' => 'Help Oklahoma'), 
+                      array('langcode' => $language));
+          $message .= $contact['message'];
+          $message .= t("Please press 1 for yes. Press 2 for no.", array(), array('langcode' => $language));
+
+          // Build call object.
+          $call = new VoipCall();
+          $call->setDestNumber($phone_num);
+          $script_name = "confirm_status_voice_request_script";
+          $script = VoipScript::loadScript($script_name);
+          $script->setVar('contact_info', json_encode($contact));
+          // Add $message to script.
+          $script->setVar('confirmation_prompt', $message);
+          $call->setScript($script);
+
+          $result = voip_dial($call);
+          if ($result) {
+            watchdog('confirm_status', "Confirmation call for $phone_number has been enqueued with third party voip provider.");
+          }
+          else {
+             $msg = $call->getErrorMessage();
+             $details = array('@msg' => $msg);
+             watchdog('confirm_status', 'Confirmation call failed with the following error: @msg',$details, WATCHDOG_WARNING);
+          }
+          break;
+
+      }
+
+}
+
+/**
+ * Provides a dummy callback for testing confirm_status_process_contact().
+ *
+ * @param int $nid
+ *  node id
+ *
+ * @param string $status
+ *  - confirmed
+ *  - not confirmed
+ *  - invalid
+ */
+function confirm_status_test($nid, $status) {
+  $text = "This is a test callback being called with nid: $nid and status: $status.";
+  watchdog('confirm_status', $text);
 }
