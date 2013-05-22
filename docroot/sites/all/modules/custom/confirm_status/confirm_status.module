@@ -3,3 +3,6 @@
  * @file confirm_status.module
  */
 
+function confirm_status_cron() {
+  
+}

@@ -7,29 +7,30 @@ Messages that are broken into multiple segments, might not arrive in proper sequ
 /**
  * Implementation of hook_voipscript_get_script_names()
  */
-function check_status_voipscript_get_script_names() {
-  $script_names[] = 'check_status_sms_handler_script';
+function confirm_status_voipscript_get_script_names() {
+  $script_names[] = 'confirm_status_sms_handler_script';
   return $script_names;
+
 }
 
 /**
  * Implementation of hook_voipscript_load_script()
  */
-function check_status_voipscript_load_script($script_name, $options = NULL) {
+function confirm_status_voipscript_load_script($script_name, $options = NULL) {
 
   $script = NULL;
   switch ($script_name) {
     default:
       break;
 
-    case 'check_status_sms_handler_script':
+    case 'confirm_status_sms_handler_script':
       // Get incoming text message, parameters associated with it and then call
       // next script, which actually processes the response. (For VOIP Drupal
       // internal reasons, these two steps need to be handled as two separate
       // scripts.)
 
       // VoIP script for Text channel
-      $script = new VoipScript('check_status_sms_handler_script');
+      $script = new VoipScript('confirm_status_sms_handler_script');
       // log the sms
       $log_msg = t("SMS from %caller_number on @date (id: %call_id)",
         array('@date' => format_date(time(), 'custom', 'D, m/d/Y - H:i:s')));
@@ -41,20 +42,20 @@ function check_status_voipscript_load_script($script_name, $options = NULL) {
       $options['dest_number'] = '%dest_number';
       $options['call_id'] = '%cid';
       $options['source'] = '%source';
-      $script->addGosub('check_status_sms_process_request_script', $options);
+      $script->addGosub('confirm_status_sms_process_response_script', $options);
       break;
 
-    case 'check_status_sms_process_request_script':
+    case 'confirm_status_sms_process_response_script':
       //Helper script to process SMS request
-      $script = new VoipScript('check_status_sms_process_request_script');
+      $script = new VoipScript('confirm_status_sms_process_response_script');
 
 // @TODO call this:
-_check_status_sms_process_request();
+_confirm_status_sms_process_response();
 
       $result = voipcall_special_chars($result);
 
       // Break message into 160 char chunks.
-      $text_array = _check_status_make_160_char_messages($result);
+      $text_array = _confirm_status_make_160_char_messages($result);
 
       // Loop through message(s) and send.
       foreach ($text_array as $index => $text) {
@@ -74,86 +75,6 @@ _check_status_sms_process_request();
   return $script;
 }
 
-/*Helper function to create ticket and return appropriate response*/
-function check_status_create_ticket($ontrack_site, $ticket_text, $caller_number, $langcode) {
-  //watchdog('check_status', "Using site language $langcode");
-  $site_name = $ontrack_site->getSiteName();
-  $site_id = $ontrack_site->getSiteId();
-
-  //Create new ticket
-  $ticket_id = ontrack_create_ticket_from_sms($site_id, $ticket_text, $caller_number);
-  $ret = t("!site_name. New request created with id !ticket_id. Please use that id in further inquiries about this ticket.",
-    array(
-      '!ticket_id' => $ticket_id,
-      '!site_name' => $site_name
-    ),
-    array(
-      'langcode' => $langcode
-    )
-  );
-
-  return $ret;
-}
-
-function check_status_retrieve_ticket($caller_number, $ticket_id, $call_id, $default_langcode) {
-  $author_uid = ontrack_get_uid_from_phone($caller_number);
-  $author = user_load($author_uid);
-  $ticket_data = ontrack_get_ticket($ticket_id);
-  if($ticket_data) {
-    $site_id = $ticket_data['site_node']->nid;
-    $ticket = $ticket_data['ticket_node'];
-
-    $ontrack_site = new OnTrackSite($site_id);
-    $site_langcode = $ontrack_site->getSiteLanguage();
-    //Use site language, if not set use phone number languaage
-    $langcode = !empty($site_langcode) ? $site_langcode : $default_langcode;
-    //watchdog('check_status', "Using site language $langcode");
-    $site_name = $ontrack_site->getSiteName();
-  }
-
-  if(!$ticket) {
-    $ret = t("Invalid request id !ticket_id. Please try again with a different one.",
-      array(
-        '!ticket_id' => $ticket_id,
-      ),
-      array(
-        'langcode' => $default_langcode,
-      )
-    );
-    //log the error
-    check_status_log($ticket_id . " is not a valid ticket. Call ID: ".$call_id);
-  }
-  else if($ticket->uid == $author_uid || check_status_is_ticket_manager($author)) {
-    //the following users might have permission to check a given ticket:
-    //a) the user calling from the phone number that created the ticket
-    //b) users with the "Ticket Manager" role
-    $ret = t("Request !ticket_id status: !ticket_state.",
-      array(
-        '!ticket_id' => $ticket_id,
-        '!ticket_state' => ontrack_get_ticket_status_description_from_code($ticket->state, $langcode),
-      ),
-      array(
-        'langcode' => $langcode,
-      ));
-  }
-  else {
-    //This user is not authorized to access the ticket
-    $ret = t("!site_name. You are not authorized to access request !ticket_id. For additional information, please contact the site administrator.",
-      array(
-        '!ticket_id' => $ticket_id,
-        '!site_name' => $site_name,
-      ),
-      array(
-        'langcode' => $langcode
-      )
-    );
-    //log the error
-    check_status_log("Unauthorized access attempted by ".$caller_number . " for request " . $ticket_id.". Call ID: ".$call_id);
-  }
-
-  return $ret;
-}
-
 /**
  * This chops the message into 160 character chunks.
  * Split text into an array to be sent one-by-one.
@@ -162,7 +83,7 @@ function check_status_retrieve_ticket($caller_number, $ticket_id, $call_id, $def
  *
  * @return array
  */
-function _check_status_make_160_char_messages($message) {
+function _confirm_status_make_160_char_messages($message) {
   if(strlen($message) == mb_strlen($message)) {
     // send response in chunks of 160 characters
     $char_limit = 160;
@@ -213,8 +134,8 @@ function _check_status_make_160_char_messages($message) {
  * @return $ret
  *  Confirmation message to be sent back to message sender.
  */
-function _check_status_sms_process_request($msg, $caller_number, $dest_number, $call_id) {
-  watchdog('check_status', "In _check_status_sms_process_request with $msg, $caller_number, $dest_number");
+function _confirm_status_sms_process_response($msg, $caller_number, $dest_number, $call_id) {
+  watchdog('confirm_status', "In _confirm_status_sms_process_response with $msg, $caller_number, $dest_number");
   global $language;
 
   //Get either a default phone number language or default site language.
@@ -227,7 +148,7 @@ function _check_status_sms_process_request($msg, $caller_number, $dest_number, $
   if ($msg == '') {
     $ret = t("Empty request.", array(), array('langcode' => $default_langcode)) . ' ' . $help_msg;
     // log the error
-    watchdog('check_status', "Empty message received. Call ID: ".$call_id);
+    watchdog('confirm_status', "Empty message received. Call ID: ".$call_id);
   }
   else {
     $msg_temp = trim($msg);
