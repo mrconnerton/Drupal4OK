@@ -221,6 +221,7 @@ $databases['default']['default'] = array(
 if (file_exists('/var/www/site-php')) {
   require('/var/www/site-php/drupal4ok/housing_branch-settings.inc');
   $conf['cache_backends'][] = './sites/all/modules/memcache/memcache.inc';
+  $conf['lock_inc'] = './sites/all/modules/memcache/memcache-lock.inc';
   $conf['cache_default_class'] = 'MemCacheDrupal';
   $conf['cache_class_form'] = 'DrupalDatabaseCache';
 }
