@@ -48,6 +48,8 @@ function confirm_status_voipscript_load_script($script_name, $options = NULL) {
       $options['call_id'] = '%cid';
       $options['source'] = '%source';
       $options['contact_info'] = '%contact_info';
+      $script->addLog('About to call
+      confirm_status_sms_process_response_script');
       $script->addGosub('confirm_status_sms_process_response_script', $options);
 
       break;
@@ -61,6 +63,7 @@ function confirm_status_voipscript_load_script($script_name, $options = NULL) {
     case 'confirm_status_sms_process_response_script':
       //Helper script to process SMS request
       $script = new VoipScript('confirm_status_sms_process_response_script');
+      watchdog('confirm_status', );
 
       // contact_info is passed to VOIP as a json encoded string. Decode to array to simplify handling.
       $contact_info = json_decode($options['contact_info']);
@@ -77,6 +80,7 @@ function confirm_status_voipscript_load_script($script_name, $options = NULL) {
       // Loop through message(s) and send.
       foreach ($text_array as $index => $text) {
         // Send message.
+        watchdog('confirm_status', "Sending message: $text");
         $script->addSendText($text);
         if ($options['source'] == 'twilio') {
           //Only Twilio supports Wait() cmd in text channel
