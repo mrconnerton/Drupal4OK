@@ -1,3 +1,0 @@
-name = Check Status
-description = Use VOIP Drupal to check status (e.g. ride / housing)
-core = 7.x
