@@ -33,6 +33,7 @@ function confirm_status_process_contact($contact) {
       $pref       = $contact['contact_preference'];
       $nid        = $contact['nid'];
       $callback   = $contact['callback'];
+      $message    = $contact['message'];
 
      // TODO
        // check confirm_status_pending table.
@@ -46,7 +47,7 @@ function confirm_status_process_contact($contact) {
       switch($pref) {
 
         case 'text':
-          $message = $contact['message'] . t("Please reply 'yes' or 'no'.", array(), array('langcode' => $language));
+          $message = $message . t("Please reply 'yes' or 'no'.", array(), array('langcode' => $language));
 
           // Build call object.
           $call = new VoipCall();
@@ -60,7 +61,7 @@ function confirm_status_process_contact($contact) {
 
           $result = voip_text($message, $call);
           if ($result) {
-            watchdog('confirm_status', "Confirmation SMS for $phone_number has been enqueued with third party voip provider.");
+            watchdog('confirm_status', "Confirmation SMS for $phone_num has been enqueued with third party voip provider.");
           }
           else {
              $msg = $call->getErrorMessage();
@@ -74,9 +75,9 @@ function confirm_status_process_contact($contact) {
           $message = t("This is a message from !name. ", 
                       // @TODO make !name configurable.
                       array('!name' => 'Help Oklahoma'), 
-                      array('langcode' => $language));
-          $message .= $contact['message'];
-          $message .= t("Please press 1 for yes. Press 2 for no.", array(), array('langcode' => $language));
+                      array('langcode' => $language))
+                      . $message
+                      . t("Please press 1 for yes. Press 2 for no.", array(), array('langcode' => $language));
 
           // Build call object.
           $call = new VoipCall();
