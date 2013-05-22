@@ -26,7 +26,7 @@ function ride_request_field_default_field_instances() {
         'module' => 'list',
         'settings' => array(),
         'type' => 'list_default',
-        'weight' => 12,
+        'weight' => 3,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -63,7 +63,7 @@ function ride_request_field_default_field_instances() {
         'module' => 'email',
         'settings' => array(),
         'type' => 'email_default',
-        'weight' => 5,
+        'weight' => 2,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -106,7 +106,7 @@ function ride_request_field_default_field_instances() {
         'module' => 'list',
         'settings' => array(),
         'type' => 'list_default',
-        'weight' => 10,
+        'weight' => 8,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -143,7 +143,7 @@ function ride_request_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 11,
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -183,7 +183,7 @@ function ride_request_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 8,
+        'weight' => 1,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -259,12 +259,9 @@ function ride_request_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'geofield',
-        'settings' => array(
-          'data' => 'full',
-        ),
-        'type' => 'geofield_wkt',
-        'weight' => 14,
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 10,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -319,7 +316,17 @@ function ride_request_field_default_field_instances() {
   // Exported field_instance: 'node-ride_request-field_ride_current_location'
   $field_instances['node-ride_request-field_ride_current_location'] = array(
     'bundle' => 'ride_request',
-    'default_value' => NULL,
+    'default_value' => array(
+      0 => array(
+        'element_key' => 'node|ride_request|field_ride_current_location|und|0',
+        'thoroughfare' => '',
+        'premise' => '',
+        'locality' => '',
+        'administrative_area' => '',
+        'postal_code' => '',
+        'country' => 'US',
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -333,7 +340,7 @@ function ride_request_field_default_field_instances() {
           'use_widget_handlers' => 1,
         ),
         'type' => 'addressfield_default',
-        'weight' => 2,
+        'weight' => 4,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -357,8 +364,8 @@ function ride_request_field_default_field_instances() {
           'US' => 'US',
         ),
         'format_handlers' => array(
-          'address' => 'address',
           'address-hide-country' => 'address-hide-country',
+          'address' => 0,
           'organisation' => 0,
           'name-full' => 0,
           'name-oneline' => 0,
@@ -377,12 +384,9 @@ function ride_request_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'geofield',
-        'settings' => array(
-          'data' => 'full',
-        ),
-        'type' => 'geofield_wkt',
-        'weight' => 15,
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 11,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -437,7 +441,17 @@ function ride_request_field_default_field_instances() {
   // Exported field_instance: 'node-ride_request-field_ride_desired_location'
   $field_instances['node-ride_request-field_ride_desired_location'] = array(
     'bundle' => 'ride_request',
-    'default_value' => NULL,
+    'default_value' => array(
+      0 => array(
+        'element_key' => 'node|ride_request|field_ride_desired_location|und|0',
+        'thoroughfare' => '',
+        'premise' => '',
+        'locality' => '',
+        'administrative_area' => '',
+        'postal_code' => '',
+        'country' => 'US',
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -451,7 +465,7 @@ function ride_request_field_default_field_instances() {
           'use_widget_handlers' => 1,
         ),
         'type' => 'addressfield_default',
-        'weight' => 3,
+        'weight' => 5,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -475,8 +489,8 @@ function ride_request_field_default_field_instances() {
           'US' => 'US',
         ),
         'format_handlers' => array(
-          'address' => 'address',
-          'address-hide-country' => 'address-hide-country',
+          'address' => 0,
+          'address-hide-country' => 0,
           'organisation' => 0,
           'name-full' => 0,
           'name-oneline' => 0,
@@ -484,6 +498,42 @@ function ride_request_field_default_field_instances() {
       ),
       'type' => 'addressfield_standard',
       'weight' => 7,
+    ),
+  );
+
+  // Exported field_instance: 'node-ride_request-field_ride_driver_assigned'
+  $field_instances['node-ride_request-field_ride_driver_assigned'] = array(
+    'bundle' => 'ride_request',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 12,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_ride_driver_assigned',
+    'label' => 'Driver Assigned',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 11,
     ),
   );
 
@@ -508,7 +558,7 @@ function ride_request_field_default_field_instances() {
           'thousand_separator' => ' ',
         ),
         'type' => 'number_integer',
-        'weight' => 4,
+        'weight' => 6,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -553,7 +603,7 @@ function ride_request_field_default_field_instances() {
         'module' => 'list',
         'settings' => array(),
         'type' => 'list_default',
-        'weight' => 6,
+        'weight' => 9,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -585,6 +635,7 @@ function ride_request_field_default_field_instances() {
   t('Current Location Geo');
   t('Desired Location');
   t('Desired Location Geo');
+  t('Driver Assigned');
   t('Email');
   t('Enter a number');
   t('For example: I need car seats, I have a wheelchair');
