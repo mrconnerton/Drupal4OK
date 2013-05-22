@@ -63,7 +63,7 @@ function confirm_status_voipscript_load_script($script_name, $options = NULL) {
     case 'confirm_status_sms_process_response_script':
       //Helper script to process SMS request
       $script = new VoipScript('confirm_status_sms_process_response_script');
-      watchdog('confirm_status', 'In confirm_status_sms_process_response_script');
+watchdog('confirm_status', 'In confirm_status_sms_process_response_script');
 
       // contact_info is passed to VOIP as a json encoded string. Decode to array to simplify handling.
       $contact_info = json_decode($options['contact_info']);
@@ -71,8 +71,9 @@ function confirm_status_voipscript_load_script($script_name, $options = NULL) {
 
       // Process message and get follow up message to send to user.
       $result_message = _confirm_status_sms_process_response($options);
+watchdog('confirm_status', "result_message: $result_message");
 
-      $result = voipcall_special_chars($result);
+      $result = voipcall_special_chars($result_message);
 
       // Break message into 160 char chunks.
       $text_array = _confirm_status_make_160_char_messages($result);
