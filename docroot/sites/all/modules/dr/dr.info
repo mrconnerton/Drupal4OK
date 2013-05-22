@@ -1,9 +1,9 @@
-name = Emergency Response Rules
-description = Emergency Response Rules
+name = Disaster Response Rules
+description = Disaster Response Rules
 core = 7.x
-package = Emergency Response
+package = Disaster Response
 version = 7.x-1.0
-project = emergency_response_rules
+project = dr_rules
 dependencies[] = entity
 dependencies[] = rules
 features[features_api][] = api:2
