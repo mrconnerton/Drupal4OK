@@ -63,14 +63,18 @@ function confirm_status_voipscript_load_script($script_name, $options = NULL) {
     case 'confirm_status_sms_process_response_script':
       //Helper script to process SMS request
       $script = new VoipScript('confirm_status_sms_process_response_script');
-watchdog('confirm_status', 'In confirm_status_sms_process_response_script');
+watchdog('confirm_status', 'In confmrm_status_sms_process_response_script');
 
       // contact_info is passed to VOIP as a json encoded string. Decode to array to simplify handling.
+watchdog('confirm_status', 'About to call json_decode.');
       $contact_info = json_decode($options['contact_info']);
-      $options['contact_info'] = $contact_info;
+      $options['contact_info'] = (array) $contact_info;
+watchdog('confirm_status', 'These are our $options:' . print_r($options, TRUE));
 
       // Process message and get follow up message to send to user.
+watchdog('confirm_status', 'About to call _confirm_status_sms_process_response.');
       $result_message = _confirm_status_sms_process_response($options);
+//$result_message = 'testing abc';
 watchdog('confirm_status', "result_message: $result_message");
 
       $result = voipcall_special_chars($result_message);
@@ -164,6 +168,7 @@ function _confirm_status_sms_process_response($options) {
   $dest_number = $options['dest_number'];
   $call_id = $options['call_id'];
   $contact_info = $options['contact_info'];
+
   $callback = $contact_info['callback'];
   $nid = $contact_info['nid'];
 
@@ -183,7 +188,7 @@ function _confirm_status_sms_process_response($options) {
     watchdog('confirm_status', "Empty message received. Call ID: ".$call_id);
   }
   else {
-    $msg_temp = trim($msg);
+    $msg_temp = strtolower(trim($msg));
     $msg_temp = str_replace(" ", "", $msg_temp);
     if ($msg_tmp == 'yes') {
       // Call callback for "yes".
@@ -191,19 +196,19 @@ function _confirm_status_sms_process_response($options) {
       // about.
       call_user_func($callback, $nid, 'confirmed');
       // Set confirmation message to be sent to user.
-      $ret = t('Thank you. Your reply has been processed.', array(), $langcode);
+      $ret = t('Thank you. Your reply has been processed.', array(), array('langcode' => $langcode));
     } 
     else if ($msg_temp == 'no') {
       // Call callback to update status to "closed".
       call_user_func($callback, $nid, 'not confirmed');
       // Set confirmation message to be sent to user.
-      $ret = t('Thank you. Your reply has been processed.', array(), $langcode);
+      $ret = t('Thank you. Your reply has been processed.', array(), array('langcode' => $langcode));
     }
     else {
       // Invalid response.   
       call_user_func($callback, $nid, 'invalid');
       // Set confirmation message to be sent to user.
-      $ret = t('Sorry. Your reply was invalid and could not be processed.', array(), $langcode);
+      $ret = t('Sorry. Your reply was invalid and could not be processed.', array(), array('langcode' => $langcode));
     }
   }
 
