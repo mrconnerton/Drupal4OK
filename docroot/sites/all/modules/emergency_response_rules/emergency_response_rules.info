@@ -1,12 +1,11 @@
-name = emergency_response_rules
-description = emergency_response_rules
+name = Emergency Response Rules
+description = Emergency Response Rules
 core = 7.x
 package = Emergency Response
 version = 7.x-1.0
 project = emergency_response_rules
 dependencies[] = entity
 dependencies[] = rules
-dependencies[] = flag
 features[features_api][] = api:2
 features[rules_config][] = rules_add_content_redirect_to_login
 project path = sites/all/modules
