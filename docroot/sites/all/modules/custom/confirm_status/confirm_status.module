@@ -26,6 +26,7 @@ function confirm_status_cron() {
  *  Indicates whether the sms message was enqueued or the call was placed.
  */
 function confirm_status_process_contact($contact) {
+  require_once 'confirm_status.scripts.inc';
 
       $phone_num  = $contact['phone_num'];
       $language   = $contact['language'];
