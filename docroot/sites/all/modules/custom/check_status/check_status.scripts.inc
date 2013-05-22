@@ -23,7 +23,12 @@ function check_status_voipscript_load_script($script_name, $options = NULL) {
       break;
 
     case 'check_status_sms_handler_script':
-      //OnTrack VoIP script for Text channel
+      // Get incoming text message, parameters associated with it and then call
+      // next script, which actually processes the response. (For VOIP Drupal
+      // internal reasons, these two steps need to be handled as two separate
+      // scripts.)
+
+      // VoIP script for Text channel
       $script = new VoipScript('check_status_sms_handler_script');
       // log the sms
       $log_msg = t("SMS from %caller_number on @date (id: %call_id)",
@@ -38,9 +43,13 @@ function check_status_voipscript_load_script($script_name, $options = NULL) {
       $options['source'] = '%source';
       $script->addGosub('check_status_sms_process_request_script', $options);
       break;
+
     case 'check_status_sms_process_request_script':
       //Helper script to process SMS request
       $script = new VoipScript('check_status_sms_process_request_script');
+
+// @TODO call this:
+_check_status_sms_process_request();
 
       $result = voipcall_special_chars($result);
 
@@ -224,6 +233,15 @@ function _check_status_sms_process_request($msg, $caller_number, $dest_number, $
     $msg_temp = trim($msg);
     $msg_temp = str_replace(" ", "", $msg_temp);
     if ($msg_tmp == 'yes') {
+      // Leave status unchanged. Person still needs/has the thing the posted
+      // about.
+
+    } 
+    else {
+      
+    }
+
+    // CONTINUE HERE
 
         //Else this is CREATE request
         //Get array of valid site_ids for this SMS number
