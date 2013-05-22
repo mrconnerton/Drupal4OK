@@ -210,21 +210,27 @@
  *   );
  * @endcode
  */
-$databases = array (
-  'default' => 
-  array (
+if (file_exists('/var/www/site-php')) {
+    require('/var/www/site-php/drupal4ok/voip_branch-settings.inc');
+}
+else {
+  // This is for local development. Bryan Hirsch's db config.
+  $databases = array (
     'default' => 
     array (
-      'database' => 'drupal4ok',
-      'username' => 'root',
-      'password' => 'root',
-      'host' => 'localhost',
-      'port' => '',
-      'driver' => 'mysql',
-      'prefix' => '',
+      'default' => 
+      array (
+        'database' => 'drupal4ok',
+        'username' => 'root',
+        'password' => 'root',
+        'host' => 'localhost',
+        'port' => '',
+        'driver' => 'mysql',
+        'prefix' => '',
+      ),
     ),
-  ),
-);
+  );
+}
 
 /**
  * Access control for update.php script.
