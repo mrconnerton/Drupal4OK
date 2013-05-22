@@ -190,7 +190,7 @@ function _confirm_status_sms_process_response($options) {
   else {
     $msg_temp = strtolower(trim($msg));
     $msg_temp = str_replace(" ", "", $msg_temp);
-    if ($msg_tmp == 'yes') {
+    if ($msg_temp == 'yes') {
       // Call callback for "yes".
       // Normal behavior: Leave status unchanged. Person still needs/has the thing the posted
       // about.
