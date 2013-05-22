@@ -453,7 +453,7 @@ input[type="button"] {
   -webkit-background-clip: padding;
   -moz-background-clip: padding;
   background-clip: padding-box;
-  background: #dddddd url('../../images/button.png?1369211220') repeat-x;
+  background: #dddddd url('../../images/button.png?1369207369') repeat-x;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(100%, #dddddd));
   background-image: -webkit-linear-gradient(#ffffff, #dddddd);
   background-image: -moz-linear-gradient(#ffffff, #dddddd);
@@ -687,7 +687,7 @@ optgroup::-moz-focus-inner {
 .ie6_button,
 * html button,
 * html a.button {
-  background: #dddddd url('../../images/button.png?1369211220') repeat-x;
+  background: #dddddd url('../../images/button.png?1369207369') repeat-x;
   border: 1px solid;
   border-color: #dddddd #bbbbbb #999999;
   cursor: pointer;
@@ -780,6 +780,9 @@ optgroup::-moz-focus-inner {
 #main-menu-container label:hover {
   background: #555555;
 }
+html.lt-ie9 #main-menu-container input {
+  display: none;
+}
 #main-menu-container input[type="checkbox"] {
   visibility: hidden;
   width: 1px;
@@ -801,6 +804,11 @@ optgroup::-moz-focus-inner {
   border-bottom: 1px solid #333333;
   max-height: 0px;
   overflow: hidden;
+}
+html.lt-ie9 #main-menu-container ul.active {
+  max-height: 9999px;
+  padding-bottom: 1.5em;
+  border-top: 1px solid #333333;
 }
 #main-menu-container ul li {
   display: block;
@@ -861,23 +869,6 @@ optgroup::-moz-focus-inner {
   display: block;
   font-size: 130%;
   font-weight: normal;
-}
-#front-menu ul li.last {
-  width: 98%;
-  clear: both;
-}
-#front-menu ul li.last a.bottom {
-  font-size: 2.5em;
-  line-height: 1.25714em;
-  padding-top: .75em;
-  padding-bottom: .75em;
-  text-align: center;
-}
-@media (min-width: 460px) {
-  #front-menu ul li.last a.bottom {
-    font-size: 3.57143em;
-    line-height: 1.32em;
-  }
 }
 
 #header,
@@ -1004,7 +995,7 @@ input[type="button"] {
   -webkit-background-clip: padding;
   -moz-background-clip: padding;
   background-clip: padding-box;
-  background: #dddddd url('../../images/button.png?1369211220') repeat-x;
+  background: #dddddd url('../../images/button.png?1369207369') repeat-x;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(100%, #dddddd));
   background-image: -webkit-linear-gradient(#ffffff, #dddddd);
   background-image: -moz-linear-gradient(#ffffff, #dddddd);
@@ -1238,7 +1229,7 @@ optgroup::-moz-focus-inner {
 .ie6_button,
 * html button,
 * html a.button {
-  background: #dddddd url('../../images/button.png?1369211220') repeat-x;
+  background: #dddddd url('../../images/button.png?1369207369') repeat-x;
   border: 1px solid;
   border-color: #dddddd #bbbbbb #999999;
   cursor: pointer;
